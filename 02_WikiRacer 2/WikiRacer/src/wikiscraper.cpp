@@ -36,7 +36,7 @@ unordered_set<string> findWikiLinks(const string& page_html) {
 
         auto str_portion = string(linkStartId, linkEndId);
         auto isAllLegal = [](char c) -> bool {
-            return (c == '_') || (c == '%') || (c == '(') || (c == ')') || isalnum(c); // isalnum(c) = isalpha(c) || isdigit(c)
+            return (c == '_') || (c == '%') || isalnum(c); // isalnum(c) = isalpha(c) || isdigit(c)
         };  // [capture list] (parameter list) -> return type { function body }
         if(std::all_of(str_portion.begin(), str_portion.end(),isAllLegal))
             result.insert(str_portion);

@@ -5,6 +5,7 @@
 #include <vector>
 #include <queue>
 #include <unordered_map>
+#include <algorithm>
 #include "wikiscraper.h"
 
 using std::cout;            using std::endl;
@@ -28,17 +29,6 @@ using std::unordered_set;   using std::cin;
  *
  *       https://en.wikipedia.org/wiki/Stanford_University
  */
-
-int similarity(const unordered_set<string>& v1, const unordered_set<string>& v_end){
-    int count = 0;
-    for(const string& str : v_end){
-        if(v1.find(str) != v1.end())
-            count++;
-    }
-    return count;
-}
-
-
 vector<string> findWikiLadder(const string& start_page, const string& end_page) {
     // TODO: 1. Once your file reading is working, replace the below
     //          return statement with "return {};".
@@ -46,82 +36,57 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
     //          from Part A into wikiscraper.cpp.
     //       3. Finally, implement this function per Part B in the handout!
     //
-    //                Best of luck!
-
-    // creates WikiScraper object
     WikiScraper scraper;
-
     unordered_set<string> visited_pages;
-    // gets the set of links on page specified by end_page
-    // variable and stores in target_set variable
     auto target_set = scraper.getLinkSet(end_page);
-
-    // ... rest of implementation
-
-    // Comparison function for priority_queue
-    // auto cmpFn = /* declare lambda comparator function */;
-    // [capture list] (parameter list) -> return type { function body }
-    auto cmpFn = [&scraper, &target_set](vector<string> v1, vector<string> v2) ->bool {
-        auto v1_linkSet = scraper.getLinkSet(v1.back());
-        auto v2_linkSet = scraper.getLinkSet(v2.back());
-        return similarity(v1_linkSet, target_set) < similarity(v2_linkSet, target_set);
+    auto cmpFn = [&](vector<string> ladder1, vector<string>ladder2) {
+        auto page1_links = scraper.getLinkSet(ladder1.back());
+        auto page2_links = scraper.getLinkSet(ladder2.back());
+        int num1 = 0, num2 = 0;
+        for (auto& s : target_set) {
+            if (page1_links.find(s) != page1_links.end()) {
+                num1 ++;
+            }
+            if (page2_links.find(s) != page2_links.end()) {
+                num2 ++;
+            }
+        }
+        return num1 < num2;
     };
 
-    // creates a priority_queue names ladderQueue
     std::priority_queue<vector<string>, vector<vector<string>>,
-                        decltype(cmpFn)> ladderQueue(cmpFn);
-
-    // ... rest of implementation
-
+            decltype (cmpFn)> ladderQueue(cmpFn);
     ladderQueue.push(vector<string>{start_page});
     visited_pages.insert(start_page);
 
-    while(!ladderQueue.empty()){
-        vector<string> cur_ladder = ladderQueue.top();
+    while (!ladderQueue.empty()) {
+        auto partial_ladder = ladderQueue.top();
         ladderQueue.pop();
-        unordered_set<string> cur_page_links = scraper.getLinkSet(cur_ladder.back());
-
-        for(const string& link : cur_page_links){
-            if(link == end_page){
-                cur_ladder.push_back(link);
-                return cur_ladder;
+        auto current_links = scraper.getLinkSet(partial_ladder.back());
+        if (current_links.find(end_page) != current_links.end()) {
+            partial_ladder.push_back(end_page);
+            return partial_ladder;
+        }
+        for (auto& link : current_links) {
+            if (visited_pages.find(link) != visited_pages.end()) {
+                continue;
             }
-            else if(visited_pages.find(link) == visited_pages.end()){
-                //我的关键错误在这里：cur_ladder在for循环开始前并没有重置，
-                //但以为重置了（因为while循环开头重置）
-                // cur_ladder.push_back(link);
-                // visited_pages.insert(link);
-                // ladderQueue.push(cur_ladder);
-                vector<string> new_ladder(cur_ladder);
-                new_ladder.push_back(link);
-                visited_pages.insert(link);
-                ladderQueue.push(new_ladder);
-            }
+            vector<string> new_ladder(partial_ladder);
+            new_ladder.push_back(link);
+            visited_pages.insert(link);
+            ladderQueue.push(new_ladder);
         }
     }
-
     return vector<string>{};
-    // return {"File reading works!", start_page, end_page};
 }
-
-// //PartA中我自己自定义的函数，为了缩减main函数内容
-// string getFile(string filename){
-//     std::ifstream file(filename);
-//     string page_html;
-//     string line;
-//     while(getline(file, line)){
-//         page_html += line;
-//     }
-//     return page_html;
-// }
 
 int main() {
     /* Container to store the found ladders in */
     vector<vector<string>> outputLadders;
 
-    cout << "Enter a file name: ";
-    string filename = "C:/Users/31023/Desktop/Code/myCS106L/02_WikiRacer 2/WikiRacer/src/test.txt";
-    // getline(cin, filename);
+    string filename = "input-big.txt";
+    cout << "Enter a file name: " << filename << endl;
+    //getline(cin, filename);
 
     // TODO: Create a filestream from the filename.
     //       For each pair {start_page, end_page} in the input file,
@@ -129,13 +94,14 @@ int main() {
     //       and append that vector to outputLadders.
 
     // Write code here
-
-    ifstream file(filename);
-    string start_page;
-    string end_page;
-    file >> start_page >> end_page;
-
-    outputLadders.push_back(findWikiLadder(start_page, end_page));
+    ifstream in(filename, ifstream::in);
+    int pair_nums;
+    string start_page, end_page;
+    in >> pair_nums;
+    for (int i = 0; i < pair_nums; i++) {
+        in >> start_page >> end_page;
+        outputLadders.push_back(findWikiLadder(start_page, end_page));
+    }
 
     /*
      * Print out all ladders in outputLadders.
@@ -162,7 +128,3 @@ int main() {
     }
     return 0;
 }
-
-
-
-
