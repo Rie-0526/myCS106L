@@ -15,16 +15,41 @@ using std::unordered_map;   using std::unordered_set;
  *
  * If you used any helper functions, just put them above this function.
  */
-unordered_set<string> findWikiLinks(const string& inp) {
+unordered_set<string> findWikiLinks(const string& page_html) {
     // TODO: Remove all the code in this function and fill
     //       in with your findWikiLinks code from part A
+    std::unordered_set<string> result;
+    string beginKey = "<a href=\"/wiki/";
+    char endKey = '\"'; 
+    auto curIt = page_html.begin();
+    auto linkStartId = curIt;
+    auto linkEndId = curIt;
 
-    errorPrint();
-    errorPrint("If you are seeing this message, you haven't implemented");
-    errorPrint("the find_wiki_links method in wikiscraper.cpp.");
-    errorPrint();
-    cout << endl;
-    return {};
+    while(curIt != page_html.end()){
+        linkStartId = std::search(curIt, page_html.end(), beginKey.begin(), beginKey.end());  //返回"<a href=\"/wiki/"的起始位置
+        if(linkStartId == page_html.end())  break;
+        linkStartId += beginKey.size();      //更改为"<a href=\"/wiki/"的末端位置
+        curIt = linkStartId;
+
+        linkEndId = std::find(curIt, page_html.end(), endKey);
+        curIt = linkEndId;
+
+        auto str_portion = string(linkStartId, linkEndId);
+        auto isAllLegal = [](char c) -> bool {
+            return (c == '_') || (c == '%') || (c == '(') || (c == ')') || isalnum(c); // isalnum(c) = isalpha(c) || isdigit(c)
+        };  // [capture list] (parameter list) -> return type { function body }
+        if(std::all_of(str_portion.begin(), str_portion.end(),isAllLegal))
+            result.insert(str_portion);
+    }
+
+    return result;
+    
+    // errorPrint();
+    // errorPrint("If you are seeing this message, you haven't implemented");
+    // errorPrint("the find_wiki_links method in wikiscraper.cpp.");
+    // errorPrint();
+    // cout << endl;
+    // return {};
 
 }
 

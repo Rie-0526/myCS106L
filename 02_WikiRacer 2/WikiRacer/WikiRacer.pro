@@ -7,9 +7,19 @@ CONFIG -= app_bundle
 CONFIG += 1zconsole
 QT += network
 
-SOURCES += $$PWD/src/*.cpp
+SOURCES += \
+    $$PWD/src/main.cpp \
+    $$PWD/src/wikiscraper.cpp \
+    $$PWD/src/error.cpp
 
-HEADERS += $$PWD/src/*.h
+HEADERS += \
+    $$PWD/src/wikiscraper.h \
+    $$PWD/src/error.h
+
+
+# SOURCES += $$PWD/src/*.cpp
+
+# HEADERS += $$PWD/src/*.h
 
 # set up flags for the compiler and Stanford C++ libraries
 QMAKE_CXXFLAGS += -std=c++17 \
