@@ -81,12 +81,15 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
         ladderQueue.pop();
         unordered_set<string> cur_page_links = scraper.getLinkSet(cur_ladder.back());
 
-        for(const string& link : cur_page_links){
-            if(link == end_page){
-                cur_ladder.push_back(link);
+        //关键效率优化，采用哈希查找目标链接集中的end_page而非在下面for循环中用字符串比对
+        if(cur_page_links.find(end_page) != cur_page_links.end()){
+                cur_ladder.push_back(end_page);
                 return cur_ladder;
-            }
-            else if(visited_pages.find(link) == visited_pages.end()){
+        }
+
+        for(const string& link : cur_page_links){
+            
+            if(visited_pages.find(link) == visited_pages.end()){
                 //我的关键错误在这里：cur_ladder在for循环开始前并没有重置，
                 //但以为重置了（因为while循环开头重置）
                 // cur_ladder.push_back(link);

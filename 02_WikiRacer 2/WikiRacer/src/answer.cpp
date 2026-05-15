@@ -63,10 +63,12 @@ vector<string> findWikiLadder(const string& start_page, const string& end_page) 
         auto partial_ladder = ladderQueue.top();
         ladderQueue.pop();
         auto current_links = scraper.getLinkSet(partial_ladder.back());
+
         if (current_links.find(end_page) != current_links.end()) {
             partial_ladder.push_back(end_page);
             return partial_ladder;
         }
+        
         for (auto& link : current_links) {
             if (visited_pages.find(link) != visited_pages.end()) {
                 continue;
